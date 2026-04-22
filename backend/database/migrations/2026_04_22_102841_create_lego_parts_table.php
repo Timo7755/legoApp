@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lego_themes', function (Blueprint $table) {
-            $table->integer('id')->primary();
-            $table->string('name');
-            $table->integer("parent_id")->nullable();
+        Schema::create('lego_parts', function (Blueprint $table) {
+          
+            $table->string("part_num")->primary();
+            $table->string("name");
+            $table->integer("part_cat_id")->nullable();
+            $table->string("img_url")->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lego_themes');
+        Schema::dropIfExists('lego_parts');
     }
 };
