@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\LegoInventory;
 
 class LegoSet extends Model
 {
@@ -18,4 +19,9 @@ class LegoSet extends Model
         "num_parts",
         "img_url",
     ];
+
+    public function inventories()
+    {
+        return $this->hasMany(LegoInventory::class);
+    }
 }

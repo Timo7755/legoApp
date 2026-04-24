@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\LegoSet;
 
 class UserSet extends Model
 {
@@ -11,4 +13,14 @@ class UserSet extends Model
         "set_num",
         "status",
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function set()
+    {
+        return $this->belongsTo(LegoSet::class);
+    }
 }
