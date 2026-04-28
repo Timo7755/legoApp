@@ -34,5 +34,8 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'rebrickable' => [
+    'key' => env('REBRICKABLE_API_KEY'),
+    ],
 
 ];
