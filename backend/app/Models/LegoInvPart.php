@@ -23,12 +23,12 @@ class LegoInvPart extends Model
     }
 
     public function part()
-    {
-        return $this->belongsTo(LegoPart::class);
-    }
+{
+    return $this->belongsTo(LegoPart::class, 'part_num', 'part_num');
+}
 
     public function color()
     {
-        return $this->belongsTo(LegoColor::class);
+        return $this->belongsTo(LegoColor::class, 'color_id', 'id');
     }
 }

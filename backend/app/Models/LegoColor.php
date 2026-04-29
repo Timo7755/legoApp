@@ -14,4 +14,6 @@ class LegoColor extends Model
         "rgb",
         "bricklink_id",
     ];
+
+    
 }

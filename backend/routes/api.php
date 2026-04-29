@@ -15,3 +15,4 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get("/sets/search", [SetController::class, "search"]);
 Route::get('/sets/{setNum}', [SetController::class, 'show']);
+Route::get('/sets/{setNum}/parts', [SetController::class, 'parts']);
