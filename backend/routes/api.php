@@ -14,3 +14,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 Route::get("/sets/search", [SetController::class, "search"]);
+Route::get('/sets/{setNum}', [SetController::class, 'show']);
