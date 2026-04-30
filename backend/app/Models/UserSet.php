@@ -21,6 +21,7 @@ class UserSet extends Model
 
     public function set()
     {
-        return $this->belongsTo(LegoSet::class);
+        return $this->belongsTo(LegoSet::class, 'set_num', 'set_num');
+
     }
 }
