@@ -41,48 +41,53 @@ class UserPartController extends Controller
     return response()->json($ownedParts);
 }
 
-    public function missingForSet(Request $request, string $setNum)
-    {
-        $userId = $request->user()->id;
+public function missingForSet(Request $request, string $setNum)
+{
+    $userId = $request->user()->id;
 
-        $inventory = \App\Models\LegoInventory::where("set_num", $setNum)->orderBy("version", "desc")->first();
+    $inventory = \App\Models\LegoInventory::where('set_num', $setNum)
+        ->orderBy('version', 'desc')
+        ->first();
 
-        if (!$inventory) {
-            return response()->json(["message" => "Set inventory not found"], 404);
-        }
-
-        $missing = \App\Models\LegoInvPart::where("inventory_id", $inventory->id)
-        ->where("is_spare", false)
-        ->with(["part", "color"])
-        ->get()
-        ->map(function($item) use ($userId) {
-            $owned = \App\Models\UserPart::where("user_id", $userId)
-            ->where("part_num", $item->part_num)
-            ->where("color_id", $item->color_id)
-            ->value("quantity_owned") ?? 0;
-
-            $still_needed = max(0, $item->quantity - $owned);
-
-            return [
-                'part_num' => $item->part_num,
-                'name' => $item->part->name ?? 'Unknown',
-                'color' => $item->color->name ?? 'Unknown',
-                'color_rgb' => $item->color->rgb ?? null,
-                'bricklink_color_id' => $item->color->bricklink_id ?? null,
-                'img_url' => $item->part->img_url ?? null,
-                'quantity_needed' => $item->quantity,
-                'quantity_owned' => $owned,
-                'still_needed' => $still_needed,
-                'bricklink_url' => "https://www.bricklink.com/v2/catalog/catalogitem.page?P={$item->part_num}&idColor={$item->color->bricklink_id}",
-            ];
-        })
-        ->filter(fn($item) => $item["still_needed"] > 0)
-        ->values();
-
-        return response()->json([
-            "set_num" => $setNum,
-            "missing_count" => $missing->count(),
-            "results" => $missing,
-        ]);
+    if (!$inventory) {
+        return response()->json(['message' => 'Set inventory not found'], 404);
     }
+
+    $invParts = \App\Models\LegoInvPart::where('inventory_id', $inventory->id)
+        ->where('is_spare', false)
+        ->with(['part', 'color'])
+        ->get();
+
+    $ownedMap = \App\Models\UserPart::where('user_id', $userId)
+        ->whereIn('part_num', $invParts->pluck('part_num'))
+        ->get()
+        ->keyBy(fn($p) => $p->part_num . '_' . $p->color_id);
+
+    $missing = $invParts->map(function($item) use ($ownedMap) {
+        $key = $item->part_num . '_' . $item->color_id;
+        $owned = $ownedMap[$key]->quantity_owned ?? 0;
+        $still_needed = max(0, $item->quantity - $owned);
+
+        return [
+            'part_num' => $item->part_num,
+            'name' => $item->part->name ?? 'Unknown',
+            'color' => $item->color->name ?? 'Unknown',
+            'color_rgb' => $item->color->rgb ?? null,
+            'bricklink_color_id' => $item->color->bricklink_id ?? null,
+            'img_url' => $item->part->img_url ?? null,
+            'quantity_needed' => $item->quantity,
+            'quantity_owned' => $owned,
+            'still_needed' => $still_needed,
+            'bricklink_url' => "https://www.bricklink.com/v2/catalog/catalogitem.page?P={$item->part_num}&idColor={$item->color->bricklink_id}",
+        ];
+    })
+    ->filter(fn($item) => $item['still_needed'] > 0)
+    ->values();
+
+    return response()->json([
+        'set_num' => $setNum,
+        'missing_count' => $missing->count(),
+        'results' => $missing,
+    ]);
+}
 }
