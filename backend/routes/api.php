@@ -18,6 +18,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user-sets', [UserSetController::class, 'store']);
     Route::delete('/user-sets/{userSet}', [UserSetController::class, 'destroy']);
     Route::post('/user-parts', [UserPartController::class, 'upsert']);
+    Route::get('/user-parts/{setNum}', [UserPartController::class, 'forSet']);
+
 });
 Route::get("/sets/search", [SetController::class, "search"]);
 Route::get('/sets/{setNum}', [SetController::class, 'show']);

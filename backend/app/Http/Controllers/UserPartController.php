@@ -25,4 +25,19 @@ class UserPartController extends Controller
 
         return response()->json($userPart, 200);
     }
+
+    public function forSet(Request $request, string $setNum)
+{
+    $ownedParts = UserPart::where('user_id', $request->user()->id)
+        ->whereIn('part_num', function($query) use ($setNum) {
+            $query->select('part_num')
+                ->from('lego_inv_parts')
+                ->join('lego_inventories', 'lego_inv_parts.inventory_id', '=', 'lego_inventories.id')
+                ->where('lego_inventories.set_num', $setNum);
+        })
+        ->get()
+        ->keyBy(fn($p) => $p->part_num . '_' . $p->color_id);
+
+    return response()->json($ownedParts);
+}
 }
