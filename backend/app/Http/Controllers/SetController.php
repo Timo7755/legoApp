@@ -18,15 +18,22 @@ class SetController extends Controller
     public function search(Request $request)
     {
         $query = $request->query('q');
-        if (!$query) {
-            return response()->json([
-                "message" => "Search query is required",
-            ], 400);
+        $themeId = $request->query('theme_id');
+        $sort = $request->query('sort');
+    
+        if (!$query && !$themeId && !$sort) {
+            return response()->json(['message' => 'Search query is required'], 400);
         }
-
-        $sets = $this->rebrickable->searchSets($query);
-        
-
+    
+        $params = ['page_size' => 20];
+    
+        if ($query) $params['search'] = $query;
+        if ($themeId) $params['theme_id'] = $themeId;
+        if ($sort === 'newest') $params['ordering'] = '-year';
+        if ($sort === 'largest') $params['ordering'] = '-num_parts';
+    
+        $sets = $this->rebrickable->searchSets('', 1, $params);
+    
         return response()->json($sets);
     }
 

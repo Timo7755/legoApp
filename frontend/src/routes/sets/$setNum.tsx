@@ -172,7 +172,7 @@ function SetDetailPage() {
 
       {/* Right column */}
       <div className="flex-1 min-w-0">
-        <div className="bg-white rounded-2xl border border-gray-200">
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
             <div className="flex items-center justify-between gap-4 mb-3">
               <h2 className="font-semibold text-gray-900 shrink-0">
@@ -222,7 +222,7 @@ function SetDetailPage() {
           )}
 
           {filteredParts && (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 overflow-y-auto max-h-[calc(100vh-280px)]">
               {filteredParts.map((item: any) => {
                 const owned = getOwned(item.part_num, item.color_id);
                 const status = getStatus(owned, item.quantity);

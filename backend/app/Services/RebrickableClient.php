@@ -27,14 +27,19 @@ class RebrickableClient
         return $response->json();
     }
 
-    public function searchSets(string $query, int $page = 1): array
-    {
-        return $this->get('/sets/', [
-            'search' => $query,
-            'page' => $page,
-            'page_size' => 20,
-        ]);
+    public function searchSets(string $query = '', int $page = 1, array $extraParams = []): array
+{
+    $params = array_merge([
+        'page' => $page,
+        'page_size' => 20,
+    ], $extraParams);
+
+    if ($query) {
+        $params['search'] = $query;
     }
+
+    return $this->get('/sets/', $params);
+}
 
     public function getSet(string $setNum): array
     {
