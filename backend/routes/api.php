@@ -32,3 +32,10 @@ Route::get('/themes/featured', [SetController::class, 'featuredThemes']);
 Route::get('/themes', [SetController::class, 'themes']);
 
 
+Route::get('/test-mail', function() {
+    \Illuminate\Support\Facades\Mail::raw('Test', function($m) {
+        $m->to('lovrec.timotej@gmail.com')->subject('Test');
+    });
+    return 'sent';
+});
+

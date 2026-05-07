@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ThemesRouteImport } from './routes/themes'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CollectionRouteImport } from './routes/collection'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,6 +25,11 @@ const ThemesRoute = ThemesRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/collection': typeof CollectionRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/themes': typeof ThemesRoute
   '/sets/$setNum': typeof SetsSetNumRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/collection': typeof CollectionRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/themes': typeof ThemesRoute
   '/sets/$setNum': typeof SetsSetNumRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/collection': typeof CollectionRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/themes': typeof ThemesRoute
   '/sets/$setNum': typeof SetsSetNumRoute
@@ -78,16 +87,25 @@ export interface FileRouteTypes {
     | '/'
     | '/collection'
     | '/login'
+    | '/profile'
     | '/register'
     | '/themes'
     | '/sets/$setNum'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/collection' | '/login' | '/register' | '/themes' | '/sets/$setNum'
+  to:
+    | '/'
+    | '/collection'
+    | '/login'
+    | '/profile'
+    | '/register'
+    | '/themes'
+    | '/sets/$setNum'
   id:
     | '__root__'
     | '/'
     | '/collection'
     | '/login'
+    | '/profile'
     | '/register'
     | '/themes'
     | '/sets/$setNum'
@@ -97,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CollectionRoute: typeof CollectionRoute
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   ThemesRoute: typeof ThemesRoute
   SetsSetNumRoute: typeof SetsSetNumRoute
@@ -116,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -153,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CollectionRoute: CollectionRoute,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   ThemesRoute: ThemesRoute,
   SetsSetNumRoute: SetsSetNumRoute,
