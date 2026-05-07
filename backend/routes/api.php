@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SetController;
 use App\Http\Controllers\UserSetController;
 use App\Http\Controllers\UserPartController;
+use App\Http\Controllers\UserController;
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -20,8 +22,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user-parts', [UserPartController::class, 'upsert']);
     Route::get('/user-parts/{setNum}', [UserPartController::class, 'forSet']);
     Route::get('/user-sets/{setNum}/missing', [UserPartController::class, 'missingForSet']);
+    Route::patch('/user', [UserController::class, 'update']);
+    Route::patch('/user/password', [UserController::class, 'updatePassword']);
 });
 Route::get("/sets/search", [SetController::class, "search"]);
 Route::get('/sets/{setNum}', [SetController::class, 'show']);
 Route::get('/sets/{setNum}/parts', [SetController::class, 'parts']);
+Route::get('/themes/featured', [SetController::class, 'featuredThemes']);
+Route::get('/themes', [SetController::class, 'themes']);
+
 

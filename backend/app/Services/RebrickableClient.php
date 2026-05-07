@@ -32,6 +32,7 @@ class RebrickableClient
     $params = array_merge([
         'page' => $page,
         'page_size' => 20,
+        'min_parts' => 7,
     ], $extraParams);
 
     if ($query) {

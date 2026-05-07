@@ -32,7 +32,8 @@ class SetController extends Controller
         if ($sort === 'newest') $params['ordering'] = '-year';
         if ($sort === 'largest') $params['ordering'] = '-num_parts';
     
-        $sets = $this->rebrickable->searchSets('', 1, $params);
+        $page = (int) $request->query('page', 1);
+        $sets = $this->rebrickable->searchSets('', $page, $params);
     
         return response()->json($sets);
     }
@@ -111,6 +112,52 @@ public function parts(string $setNum)
         ->get();
 
     return response()->json($parts);
+}
+
+public function themes(Request $request)
+{
+    $query = $request->query('q', '');
+
+    $themes = \App\Models\LegoTheme::when($query, function($q) use ($query) {
+        $q->where('name', 'ilike', '%' . $query . '%');
+    })
+    ->whereNull('parent_id')
+    ->orderBy('name')
+    ->limit($query ? 20 : 500)
+    ->get(['id', 'name']);
+
+    return response()->json($themes);
+}
+    public function featuredThemes()
+{
+    $themeData = [
+        'Star Wars'    => '75192-1',
+        'City'         => '60388-1',
+        'Ninjago'      => '71741-1',
+        'Architecture' => '21044-1',
+        'Icons'        => '10307-1',
+        'Avatar'       => '75575-1',
+        'Harry Potter' => '71043-1',
+        'Minecraft'    => '21137-1',
+        'Technic'      => '42158-1',
+        'Creator'      => '31120-1',
+    ];
+
+    $themes = \App\Models\LegoTheme::whereIn('name', array_keys($themeData))
+        ->whereNull('parent_id')
+        ->get(['id', 'name'])
+        ->map(function($t) use ($themeData) {
+            $setNum = $themeData[$t->name];
+            $set = \App\Models\LegoSet::find($setNum);
+            return [
+                'id' => $t->id,
+                'name' => $t->name,
+                'img_url' => $set?->img_url ?? null,
+                'set_num' => $setNum,
+            ];
+        });
+
+    return response()->json($themes);
 }
     
 }
