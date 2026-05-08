@@ -704,7 +704,12 @@ function HomePage() {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {mergedSearchResults.map((set: any) => (
-                  <SetCard key={set.set_num} set={set} />
+                  <SetCard
+                    key={set.set_num}
+                    set={set}
+                    userSets={userSets}
+                    onAdd={(setNum) => addToCollectionMutation.mutate(setNum)}
+                  />
                 ))}
               </div>
               <Pagination
@@ -747,7 +752,12 @@ function HomePage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {featuredSets.map((set: any) => (
-              <SetCard key={set.set_num} set={set} />
+              <SetCard
+                key={set.set_num}
+                set={set}
+                userSets={userSets}
+                onAdd={(setNum) => addToCollectionMutation.mutate(setNum)}
+              />
             ))}
           </div>
         </div>
