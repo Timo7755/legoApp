@@ -8,6 +8,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../lib/axios";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -57,6 +58,43 @@ function ThemesDropdown({ onClose }: { onClose: () => void }) {
           <span>→</span>
         </Link>
       </div>
+    </div>
+  );
+}
+
+function VerificationBanner() {
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleResend = async () => {
+    setLoading(true);
+    try {
+      await api.post("/email/resend");
+      setSent(true);
+    } catch {
+      // silent fail
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (sent)
+    return (
+      <div className="bg-green-500 text-white text-sm px-6 py-2.5 text-center">
+        Verification email sent — check your inbox.
+      </div>
+    );
+
+  return (
+    <div className="bg-yellow-400 text-gray-900 text-sm px-6 py-2.5 flex items-center justify-center gap-3">
+      <span>Please verify your email address to access all features.</span>
+      <button
+        onClick={handleResend}
+        disabled={loading}
+        className="bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
+      >
+        {loading ? "Sending..." : "Resend email"}
+      </button>
     </div>
   );
 }
@@ -203,9 +241,12 @@ function RootLayout() {
           </div>
         </div>
       </nav>
+      {user && !user.email_verified_at && <VerificationBanner />}
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   );

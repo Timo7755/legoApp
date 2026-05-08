@@ -12,11 +12,15 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\UserSet;
 use App\Models\UserPart;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 
-#[Fillable(['name', 'email', 'password'])]
+
+#[Fillable(['name', 'email', 'password', 'pending_email', 'name_changed_at'])]
+
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
+
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
@@ -43,4 +47,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserPart::class);
     }
+    public function sendEmailVerificationNotification(): void
+{
+    $this->notify(new \App\Notifications\VerifyEmailNotification);
+}
+
+public function sendPendingEmailVerificationNotification(): void
+{
+    $this->notify(new \App\Notifications\PendingEmailVerificationNotification);
+}
 }

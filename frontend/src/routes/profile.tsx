@@ -16,22 +16,24 @@ function ProfilePage() {
   const user = userStr ? JSON.parse(userStr) : null;
 
   const [name, setName] = useState(user?.name ?? "");
-  const [email, setEmail] = useState(user?.email ?? "");
+  const [profilePassword, setProfilePassword] = useState("");
+  const [changeCurrentPassword, setChangeCurrentPassword] = useState("");
   const [profileSuccess, setProfileSuccess] = useState("");
   const [profileError, setProfileError] = useState("");
-
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
   const profileMutation = useMutation({
-    mutationFn: () => api.patch("/user", { name, email }),
+    mutationFn: () =>
+      api.patch("/user", { name, current_password: profilePassword }),
     onSuccess: (res) => {
       localStorage.setItem("user", JSON.stringify(res.data));
-      setProfileSuccess("Profile updated successfully.");
+      setProfileSuccess("Name updated successfully.");
       setProfileError("");
+      setProfilePassword("");
+      window.location.reload();
     },
     onError: (err: any) => {
       setProfileError(err.response?.data?.message ?? "Something went wrong.");
@@ -42,14 +44,14 @@ function ProfilePage() {
   const passwordMutation = useMutation({
     mutationFn: () =>
       api.patch("/user/password", {
-        current_password: currentPassword,
+        current_password: changeCurrentPassword,
         password: newPassword,
         password_confirmation: confirmPassword,
       }),
     onSuccess: () => {
       setPasswordSuccess("Password changed successfully.");
       setPasswordError("");
-      setCurrentPassword("");
+      setChangeCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     },
@@ -67,7 +69,10 @@ function ProfilePage() {
 
       {/* Account info */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
-        <h2 className="font-semibold text-gray-900 mb-4">Account info</h2>
+        <h2 className="font-semibold text-gray-900 mb-1">Account info</h2>
+        <p className="text-xs text-gray-400 mb-4">
+          You can change your name once every 7 days.
+        </p>
 
         {profileSuccess && (
           <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg px-4 py-3 mb-4">
@@ -83,6 +88,17 @@ function ProfilePage() {
         <div className="flex flex-col gap-4">
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1">
+              Email
+            </label>
+            <p className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2">
+              {user?.email}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Email cannot be changed.
+            </p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">
               Name
             </label>
             <input
@@ -94,12 +110,15 @@ function ProfilePage() {
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1">
-              Email
+              Confirm with your password
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="profile_password"
+              autoComplete="current-password"
+              type="password"
+              value={profilePassword}
+              onChange={(e) => setProfilePassword(e.target.value)}
+              placeholder="Enter your password to confirm"
               className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
           </div>
@@ -134,9 +153,11 @@ function ProfilePage() {
               Current password
             </label>
             <input
+              name="change-current-password"
+              autoComplete="current-password"
               type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              value={changeCurrentPassword}
+              onChange={(e) => setChangeCurrentPassword(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
           </div>
@@ -145,6 +166,8 @@ function ProfilePage() {
               New password
             </label>
             <input
+              name="new-password"
+              autoComplete="new-password"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -156,6 +179,8 @@ function ProfilePage() {
               Confirm new password
             </label>
             <input
+              name="confirm-new-password"
+              autoComplete="new-password"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

@@ -18,6 +18,7 @@ function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,16 +26,35 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await api.post("/register", { name, email, password });
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      window.location.href = "/collection";
+      await api.post("/register", { name, email, password });
+      setSuccess(
+        "Registration successful! Please check your email to verify your account.",
+      );
     } catch (err: any) {
       setError(err.response?.data?.message ?? "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
+
+  if (success)
+    return (
+      <div className="max-w-sm mx-auto mt-16">
+        <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
+          <div className="text-4xl mb-4">✉️</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Check your email
+          </h1>
+          <p className="text-gray-500 text-sm mb-6">{success}</p>
+          <a
+            href="/login"
+            className="text-yellow-600 hover:text-yellow-700 text-sm font-medium"
+          >
+            Back to login
+          </a>
+        </div>
+      </div>
+    );
 
   return (
     <div className="max-w-sm mx-auto mt-16">

@@ -9,16 +9,38 @@ use Illuminate\Validation\Rules\Password;
 class UserController extends Controller
 {
     public function update(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users,email,' . $request->user()->id,
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'current_password' => 'required|string',
+    ]);
 
-        $request->user()->update($validated);
+    $user = $request->user();
 
-        return response()->json($request->user()->fresh());
+    if (!Hash::check($validated['current_password'], $user->password)) {
+        return response()->json([
+            'message' => 'Password is incorrect.',
+            'errors' => ['current_password' => ['Password is incorrect.']],
+        ], 422);
     }
+
+    if ($user->name_changed_at) {
+        $daysSince = now()->diffInDays($user->name_changed_at);
+        if ($daysSince < 7) {
+            $daysLeft = 7 - $daysSince;
+            return response()->json([
+                'message' => "You can only change your name once every 7 days. Try again in {$daysLeft} day(s).",
+            ], 422);
+        }
+    }
+
+    $user->update([
+        'name' => $validated['name'],
+        'name_changed_at' => now(),
+    ]);
+
+    return response()->json($user->fresh());
+}
 
     public function updatePassword(Request $request)
     {

@@ -27,7 +27,7 @@ function LoginPage() {
       const res = await api.post("/login", { email, password });
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      window.location.href = "/collection";
+      window.location.href = "/";
     } catch (err: any) {
       setError(err.response?.data?.message ?? "Something went wrong");
     } finally {
@@ -73,6 +73,14 @@ function LoginPage() {
               required
               className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
+          </div>
+          <div className="text-right">
+            <a
+              href="/forgot-password"
+              className="text-xs text-yellow-600 hover:text-yellow-700"
+            >
+              Forgot password?
+            </a>
           </div>
           <button
             type="submit"

@@ -22,11 +22,10 @@ class AuthController extends Controller
             "password" => Hash::make($validated["password"]),
         ]);
 
-        $token = $user->createToken("auth_token")->plainTextToken;
+        $user->sendEmailVerificationNotification();
 
         return response()->json([
-            "user" => $user,
-            "token" => $token,
+            "message" => "Registration successful. Please check your email to verify your account.",
         ], 201);
     }
 
@@ -39,13 +38,17 @@ class AuthController extends Controller
 
         $user = User::where("email", $validated["email"])->first();
 
-        
-
-
         if (!$user || !Hash::check($validated['password'], $user->password)) {
             return response()->json([
                 "message" => "Invalid credentials",
             ], 401);
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Please verify your email address before logging in.',
+                'email_unverified' => true,
+            ], 403);
         }
 
         $token = $user->createToken("auth_token")->plainTextToken;
@@ -64,5 +67,4 @@ class AuthController extends Controller
             "message" => "Logged out successfully",
         ], 200);
     }
-
 }

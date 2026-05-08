@@ -9,17 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifiedRouteImport } from './routes/verified'
 import { Route as ThemesRouteImport } from './routes/themes'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CollectionRouteImport } from './routes/collection'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SetsSetNumRouteImport } from './routes/sets/$setNum'
+import { Route as EmailVerifyRouteImport } from './routes/email/verify'
 
+const VerifiedRoute = VerifiedRouteImport.update({
+  id: '/verified',
+  path: '/verified',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ThemesRoute = ThemesRouteImport.update({
   id: '/themes',
   path: '/themes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -37,6 +51,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollectionRoute = CollectionRouteImport.update({
   id: '/collection',
   path: '/collection',
@@ -52,33 +71,50 @@ const SetsSetNumRoute = SetsSetNumRouteImport.update({
   path: '/sets/$setNum',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailVerifyRoute = EmailVerifyRouteImport.update({
+  id: '/email/verify',
+  path: '/email/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/collection': typeof CollectionRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/themes': typeof ThemesRoute
+  '/verified': typeof VerifiedRoute
+  '/email/verify': typeof EmailVerifyRoute
   '/sets/$setNum': typeof SetsSetNumRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/collection': typeof CollectionRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/themes': typeof ThemesRoute
+  '/verified': typeof VerifiedRoute
+  '/email/verify': typeof EmailVerifyRoute
   '/sets/$setNum': typeof SetsSetNumRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/collection': typeof CollectionRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/themes': typeof ThemesRoute
+  '/verified': typeof VerifiedRoute
+  '/email/verify': typeof EmailVerifyRoute
   '/sets/$setNum': typeof SetsSetNumRoute
 }
 export interface FileRouteTypes {
@@ -86,48 +122,78 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/collection'
+    | '/forgot-password'
     | '/login'
     | '/profile'
     | '/register'
+    | '/reset-password'
     | '/themes'
+    | '/verified'
+    | '/email/verify'
     | '/sets/$setNum'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/collection'
+    | '/forgot-password'
     | '/login'
     | '/profile'
     | '/register'
+    | '/reset-password'
     | '/themes'
+    | '/verified'
+    | '/email/verify'
     | '/sets/$setNum'
   id:
     | '__root__'
     | '/'
     | '/collection'
+    | '/forgot-password'
     | '/login'
     | '/profile'
     | '/register'
+    | '/reset-password'
     | '/themes'
+    | '/verified'
+    | '/email/verify'
     | '/sets/$setNum'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CollectionRoute: typeof CollectionRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ThemesRoute: typeof ThemesRoute
+  VerifiedRoute: typeof VerifiedRoute
+  EmailVerifyRoute: typeof EmailVerifyRoute
   SetsSetNumRoute: typeof SetsSetNumRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verified': {
+      id: '/verified'
+      path: '/verified'
+      fullPath: '/verified'
+      preLoaderRoute: typeof VerifiedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/themes': {
       id: '/themes'
       path: '/themes'
       fullPath: '/themes'
       preLoaderRoute: typeof ThemesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -151,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/collection': {
       id: '/collection'
       path: '/collection'
@@ -172,16 +245,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SetsSetNumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/email/verify': {
+      id: '/email/verify'
+      path: '/email/verify'
+      fullPath: '/email/verify'
+      preLoaderRoute: typeof EmailVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CollectionRoute: CollectionRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ThemesRoute: ThemesRoute,
+  VerifiedRoute: VerifiedRoute,
+  EmailVerifyRoute: EmailVerifyRoute,
   SetsSetNumRoute: SetsSetNumRoute,
 }
 export const routeTree = rootRouteImport
