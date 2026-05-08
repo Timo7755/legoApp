@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
 import api from "../lib/axios";
 import { useDebounce } from "../lib/useDebounce";
 import { SetCardSkeleton } from "../components/Skeleton";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -48,7 +48,6 @@ const CAROUSEL_SETS = [
 ];
 
 const RECENT_KEY = "legoapp_recent_searches";
-const MAX_RECENT = 5;
 
 function getRecentSearches(): string[] {
   try {
@@ -58,47 +57,79 @@ function getRecentSearches(): string[] {
   }
 }
 
-function addRecentSearch(query: string) {
-  const recent = getRecentSearches().filter((q) => q !== query);
-  recent.unshift(query);
-  localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
-}
-
-function SetCard({ set }: { set: any }) {
+function SetCard({
+  set,
+  userSets,
+  onAdd,
+}: {
+  set: any;
+  userSets?: any[];
+  onAdd?: (setNum: string) => void;
+}) {
   const imgUrl = set.set_img_url ?? set.img_url;
+  const isLoggedIn = !!localStorage.getItem("token");
+  const isInCollection = userSets?.some(
+    (us: any) => us.set_num === set.set_num,
+  );
+
   return (
-    <Link
-      to="/sets/$setNum"
-      params={{ setNum: set.set_num }}
-      className="bg-white rounded-2xl border border-gray-200 hover:border-yellow-400 hover:shadow-lg transition-all overflow-hidden group"
-    >
-      <div className="aspect-square bg-gray-50 p-4 flex items-center justify-center group-hover:bg-gray-100 transition-colors">
-        {imgUrl ? (
-          <img
-            src={imgUrl}
-            alt={set.name}
-            className="max-w-full max-h-full object-contain"
-          />
-        ) : (
-          <div className="w-16 h-16 bg-gray-200 rounded-lg animate-pulse" />
-        )}
-      </div>
-      <div className="p-4">
-        <p className="font-semibold text-gray-900 text-sm leading-tight mb-1 line-clamp-2">
-          {set.name}
-        </p>
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-400">
-            {set.set_num} · {set.year}
-          </p>
-          {set.num_parts > 0 && (
-            <p className="text-xs font-medium text-gray-500">
-              {set.num_parts} parts
-            </p>
+    <div className="bg-white rounded-2xl border border-gray-200 hover:border-yellow-400 hover:shadow-lg transition-all overflow-hidden group relative">
+      <Link
+        to="/sets/$setNum"
+        params={{ setNum: set.set_num }}
+        className="block"
+      >
+        <div className="aspect-square bg-gray-50 p-4 flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+          {imgUrl ? (
+            <img
+              src={imgUrl}
+              alt={set.name}
+              className="max-w-full max-h-full object-contain"
+            />
+          ) : (
+            <div className="w-16 h-16 bg-gray-200 rounded-lg animate-pulse" />
           )}
         </div>
-      </div>
-    </Link>
+        <div className="p-4 pb-2">
+          <p className="font-semibold text-gray-900 text-sm leading-tight mb-1 line-clamp-2">
+            {set.name}
+          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-400">
+              {set.set_num} · {set.year}
+            </p>
+            {set.num_parts > 0 && (
+              <p className="text-xs font-medium text-gray-500">
+                {set.num_parts} parts
+              </p>
+            )}
+          </div>
+        </div>
+      </Link>
+
+      {isLoggedIn && (
+        <div className="px-4 pb-4 pt-2">
+          {isInCollection ? (
+            <a
+              href="/collection"
+              className="w-full block text-center bg-green-50 text-green-700 border border-green-200 text-xs font-medium py-1.5 rounded-lg"
+            >
+              ✓ In collection
+            </a>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onAdd?.(set.set_num);
+              }}
+              className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-xs font-medium py-1.5 rounded-lg transition-colors cursor-pointer"
+            >
+              + Add to collection
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -426,16 +457,27 @@ function HomePage() {
 
   const { data: searchData, isLoading: searchLoading } = useQuery({
     queryKey: ["sets", "search", debouncedSearch, searchPage],
-    queryFn: () => {
-      if (searchPage === 1) {
-        addRecentSearch(debouncedSearch);
-        setRecentSearches(getRecentSearches());
-      }
-      return api
+    queryFn: () =>
+      api
         .get(`/sets/search?q=${debouncedSearch}&page=${searchPage}`)
-        .then((r) => r.data);
-    },
+        .then((r) => r.data),
+
     enabled: isSearching,
+  });
+
+  const { data: userSets } = useQuery({
+    queryKey: ["user-sets"],
+    queryFn: () => api.get("/user-sets").then((r) => r.data),
+    enabled: !!localStorage.getItem("token"),
+  });
+
+  const queryClient = useQueryClient();
+
+  const addToCollectionMutation = useMutation({
+    mutationFn: (setNum: string) => api.post("/user-sets", { set_num: setNum }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-sets"] });
+    },
   });
 
   const { data: themeSearchData } = useQuery({
@@ -497,6 +539,17 @@ function HomePage() {
     setActiveTheme(id);
     setActiveThemeName(name);
     setActiveSort(null);
+    if (id !== null && name) {
+      const recent = JSON.parse(
+        localStorage.getItem("legoapp_recent_searches") ?? "[]",
+      ).filter((q: string) => q !== name);
+      recent.unshift(name);
+      localStorage.setItem(
+        "legoapp_recent_searches",
+        JSON.stringify(recent.slice(0, 5)),
+      );
+      setRecentSearches(getRecentSearches());
+    }
     navigate({
       to: "/",
       search: { q: "", theme_id: id, theme_name: name },
@@ -594,7 +647,12 @@ function HomePage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {browseResults?.map((set: any) => (
-              <SetCard key={set.set_num} set={set} />
+              <SetCard
+                key={set.set_num}
+                set={set}
+                userSets={userSets}
+                onAdd={(setNum) => addToCollectionMutation.mutate(setNum)}
+              />
             ))}
           </div>
           <Pagination

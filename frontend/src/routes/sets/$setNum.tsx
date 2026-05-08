@@ -4,6 +4,7 @@ import { useState } from "react";
 import api from "../../lib/axios";
 import { SetDetailSkeleton } from "../../components/Skeleton";
 
+import { useEffect } from "react";
 export const Route = createFileRoute("/sets/$setNum")({
   component: SetDetailPage,
 });
@@ -38,6 +39,13 @@ function SetDetailPage() {
     queryKey: ["set", setNum],
     queryFn: () => api.get(`/sets/${setNum}`).then((r) => r.data),
   });
+
+  useEffect(() => {
+    if (set) document.title = `${set.name} — LegoApp`;
+    return () => {
+      document.title = "LegoApp";
+    };
+  }, [set]);
 
   const { data: parts, isLoading: partsLoading } = useQuery({
     queryKey: ["set", setNum, "parts"],

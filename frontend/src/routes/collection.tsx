@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import api from "../lib/axios";
 import { CollectionSkeleton, SetProgress } from "../components/Skeleton";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/collection")({
   beforeLoad: () => {
@@ -129,9 +130,6 @@ function MissingPartsModal({
 
 function CollectionPage() {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
-  const [addingSet, setAddingSet] = useState("");
-  const [addError, setAddError] = useState("");
   const [missingModal, setMissingModal] = useState<{
     setNum: string;
     setName: string;
@@ -142,17 +140,12 @@ function CollectionPage() {
     queryFn: () => api.get("/user-sets").then((r) => r.data),
   });
 
-  const addMutation = useMutation({
-    mutationFn: (setNum: string) => api.post("/user-sets", { set_num: setNum }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-sets"] });
-      setAddingSet("");
-      setAddError("");
-    },
-    onError: (err: any) => {
-      setAddError(err.response?.data?.message ?? "Could not add set");
-    },
-  });
+  useEffect(() => {
+    document.title = "My Collection — LegoApp";
+    return () => {
+      document.title = "LegoApp";
+    };
+  }, []);
 
   const removeMutation = useMutation({
     mutationFn: (id: number) => api.delete(`/user-sets/${id}`),
@@ -161,76 +154,42 @@ function CollectionPage() {
     },
   });
 
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!addingSet.trim()) return;
-    addMutation.mutate(addingSet.trim());
-  };
-
-  const filteredSets = userSets?.filter(
-    (us: any) =>
-      us.set?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      us.set_num?.toLowerCase().includes(search.toLowerCase()),
-  );
-
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Collection</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {userSets?.length ?? 0} sets tracked
+            {userSets?.length ?? 0} sets tracked — add sets from the{" "}
+            <a
+              href="/"
+              className="text-yellow-600 hover:text-yellow-700 font-medium"
+            >
+              search page
+            </a>
           </p>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-6">
-        <h2 className="font-semibold text-gray-900 mb-3">Add a set</h2>
-        <form onSubmit={handleAdd} className="flex gap-2">
-          <input
-            type="text"
-            value={addingSet}
-            onChange={(e) => setAddingSet(e.target.value)}
-            placeholder="Enter set number e.g. 75192-1"
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-          />
-          <button
-            type="submit"
-            disabled={addMutation.isPending}
-            className="bg-yellow-400 hover:bg-yellow-500 disabled:opacity-50 text-gray-900 font-medium px-6 py-2 rounded-lg text-sm"
-          >
-            {addMutation.isPending ? "Adding..." : "Add"}
-          </button>
-        </form>
-        {addError && <p className="text-red-500 text-sm mt-2">{addError}</p>}
-        <p className="text-xs text-gray-400 mt-2">
-          Tip: find the set number by searching on the home page first.
-        </p>
-      </div>
-
-      {userSets?.length > 0 && (
-        <div className="mb-4">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filter your sets..."
-            className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 w-64"
-          />
-        </div>
-      )}
-
       {isLoading && <CollectionSkeleton />}
 
-      {filteredSets?.length === 0 && !isLoading && (
+      {!isLoading && userSets?.length === 0 && (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-lg font-medium mb-1">No sets yet</p>
-          <p className="text-sm">Add a set number above to start tracking</p>
+          <p className="text-lg font-medium mb-2">No sets yet</p>
+          <p className="text-sm mb-6">
+            Search for a set and click "Add to collection"
+          </p>
+          <a
+            href="/"
+            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium px-6 py-2.5 rounded-xl text-sm inline-block"
+          >
+            Browse sets
+          </a>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredSets?.map((us: any) => (
+        {userSets?.map((us: any) => (
           <div
             key={us.id}
             className="bg-white border border-gray-200 rounded-2xl hover:border-yellow-400 transition-all overflow-hidden"

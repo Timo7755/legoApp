@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import api from "../lib/axios";
 
@@ -40,6 +40,13 @@ function ProfilePage() {
       setProfileSuccess("");
     },
   });
+
+  useEffect(() => {
+    document.title = "Profile — LegoApp";
+    return () => {
+      document.title = "LegoApp";
+    };
+  }, []);
 
   const passwordMutation = useMutation({
     mutationFn: () =>
