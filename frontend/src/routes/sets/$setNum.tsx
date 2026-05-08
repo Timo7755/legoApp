@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import api from "../../lib/axios";
+import { SetDetailSkeleton } from "../../components/Skeleton";
 
 export const Route = createFileRoute("/sets/$setNum")({
   component: SetDetailPage,
@@ -85,8 +86,7 @@ function SetDetailPage() {
       }
     : null;
 
-  if (setLoading)
-    return <p className="text-center text-gray-500 mt-20">Loading set...</p>;
+  if (setLoading) return <SetDetailSkeleton />;
 
   if (!set)
     return <p className="text-center text-red-500 mt-20">Set not found.</p>;

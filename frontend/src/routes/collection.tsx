@@ -2,6 +2,7 @@ import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import api from "../lib/axios";
+import { CollectionSkeleton } from "../components/Skeleton";
 
 export const Route = createFileRoute("/collection")({
   beforeLoad: () => {
@@ -219,11 +220,7 @@ function CollectionPage() {
         </div>
       )}
 
-      {isLoading && (
-        <p className="text-center text-gray-500 py-12">
-          Loading your collection...
-        </p>
-      )}
+      {isLoading && <CollectionSkeleton />}
 
       {filteredSets?.length === 0 && !isLoading && (
         <div className="text-center py-16 text-gray-400">
