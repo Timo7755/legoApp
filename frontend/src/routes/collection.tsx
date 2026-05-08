@@ -2,7 +2,7 @@ import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import api from "../lib/axios";
-import { CollectionSkeleton } from "../components/Skeleton";
+import { CollectionSkeleton, SetProgress } from "../components/Skeleton";
 
 export const Route = createFileRoute("/collection")({
   beforeLoad: () => {
@@ -258,7 +258,7 @@ function CollectionPage() {
                 </p>
               </div>
             </Link>
-
+            <SetProgress setNum={us.set_num} />
             <div className="flex gap-2 px-4 pb-4">
               <button
                 onClick={() =>

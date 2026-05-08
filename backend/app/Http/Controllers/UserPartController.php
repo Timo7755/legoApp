@@ -90,4 +90,39 @@ public function missingForSet(Request $request, string $setNum)
         'results' => $missing,
     ]);
 }
+
+public function progressForSet(Request $request, string $setNum)
+{
+    $userId = $request->user()->id;
+
+    $inventory = \App\Models\LegoInventory::where('set_num', $setNum)
+        ->orderBy('version', 'desc')
+        ->first();
+
+    if (!$inventory) {
+        return response()->json(['total' => 0, 'owned' => 0, 'complete' => 0]);
+    }
+
+    $invParts = \App\Models\LegoInvPart::where('inventory_id', $inventory->id)
+        ->where('is_spare', false)
+        ->get(['part_num', 'color_id', 'quantity']);
+
+    $ownedMap = \App\Models\UserPart::where('user_id', $userId)
+        ->whereIn('part_num', $invParts->pluck('part_num'))
+        ->get()
+        ->keyBy(fn($p) => $p->part_num . '_' . $p->color_id);
+
+    $total = $invParts->count();
+    $complete = $invParts->filter(function($item) use ($ownedMap) {
+        $key = $item->part_num . '_' . $item->color_id;
+        $owned = $ownedMap[$key]->quantity_owned ?? 0;
+        return $owned >= $item->quantity;
+    })->count();
+
+    return response()->json([
+        'total' => $total,
+        'complete' => $complete,
+        'percent' => $total > 0 ? round(($complete / $total) * 100) : 0,
+    ]);
+}
 }

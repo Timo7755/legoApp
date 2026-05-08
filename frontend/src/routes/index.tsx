@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../lib/axios";
 import { useDebounce } from "../lib/useDebounce";
-import { SetCardSkeleton } from "../lib/../components/Skeleton";
+import { SetCardSkeleton } from "../components/Skeleton";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -677,6 +677,19 @@ function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <SetCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {showHome && featuredSets && (
+        <div className="mt-4">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            Featured sets
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {featuredSets.map((set: any) => (
+              <SetCard key={set.set_num} set={set} />
             ))}
           </div>
         </div>

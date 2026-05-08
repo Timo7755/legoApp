@@ -1,3 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
+import api from "../lib/axios";
+
 function SkeletonBox({ className }: { className?: string }) {
   return (
     <div
@@ -82,6 +85,34 @@ export function CollectionSkeleton() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+export function SetProgress({ setNum }: { setNum: string }) {
+  const { data } = useQuery({
+    queryKey: ["set-progress", setNum],
+    queryFn: () => api.get(`/user-sets/${setNum}/progress`).then((r) => r.data),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!data || data.total === 0) return null;
+
+  return (
+    <div className="px-4 py-2">
+      <div className="flex justify-between text-xs text-gray-400 mb-1">
+        <span>
+          {data.complete}/{data.total} parts
+        </span>
+        <span>{data.percent}%</span>
+      </div>
+      <div className="w-full bg-gray-100 rounded-full h-1.5">
+        <div
+          className={`h-1.5 rounded-full transition-all ${
+            data.percent === 100 ? "bg-green-400" : "bg-yellow-400"
+          }`}
+          style={{ width: `${data.percent}%` }}
+        />
+      </div>
     </div>
   );
 }

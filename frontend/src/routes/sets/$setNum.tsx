@@ -19,6 +19,21 @@ function SetDetailPage() {
   const [modalImg, setModalImg] = useState<string | null>(null);
   const isLoggedIn = !!localStorage.getItem("token");
 
+  const { data: userSets } = useQuery({
+    queryKey: ["user-sets"],
+    queryFn: () => api.get("/user-sets").then((r) => r.data),
+    enabled: isLoggedIn,
+  });
+
+  const isInCollection = userSets?.some((us: any) => us.set_num === setNum);
+
+  const addToCollectionMutation = useMutation({
+    mutationFn: () => api.post("/user-sets", { set_num: setNum }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-sets"] });
+    },
+  });
+
   const { data: set, isLoading: setLoading } = useQuery({
     queryKey: ["set", setNum],
     queryFn: () => api.get(`/sets/${setNum}`).then((r) => r.data),
@@ -139,6 +154,28 @@ function SetDetailPage() {
               </p>
             </div>
           </div>
+          {isLoggedIn && (
+            <div className="mt-4">
+              {isInCollection ? (
+                <a
+                  href="/collection"
+                  className="w-full block text-center bg-green-50 text-green-700 border border-green-200 font-medium py-2.5 rounded-xl text-sm cursor-pointer"
+                >
+                  ✓ In your collection
+                </a>
+              ) : (
+                <button
+                  onClick={() => addToCollectionMutation.mutate()}
+                  disabled={addToCollectionMutation.isPending}
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:opacity-50 text-gray-900 font-medium py-2.5 rounded-xl text-sm transition-colors cursor-pointer"
+                >
+                  {addToCollectionMutation.isPending
+                    ? "Adding..."
+                    : "+ Add to collection"}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {isLoggedIn && stats && (

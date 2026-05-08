@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user-sets', [UserSetController::class, 'store']);
     Route::delete('/user-sets/{userSet}', [UserSetController::class, 'destroy']);
     Route::post('/user-parts', [UserPartController::class, 'upsert']);
+    Route::get('/user-sets/{setNum}/progress', [UserPartController::class, 'progressForSet']);
     Route::get('/user-parts/{setNum}', [UserPartController::class, 'forSet']);
     Route::get('/user-sets/{setNum}/missing', [UserPartController::class, 'missingForSet']);
     Route::patch('/user', [UserController::class, 'update']);
