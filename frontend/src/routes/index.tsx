@@ -49,6 +49,18 @@ const CAROUSEL_SETS = [
 
 const RECENT_KEY = "legoapp_recent_searches";
 
+const FEATURED_POOL = [
+  "75192-1",
+  "10307-1",
+  "10294-1",
+  "10305-1",
+  "42158-1",
+  "21325-1",
+  "10311-1",
+  "21060-1",
+  "76989-1",
+];
+
 function getRecentSearches(): string[] {
   try {
     return JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
@@ -519,21 +531,18 @@ function HomePage() {
   const { data: featuredSets } = useQuery({
     queryKey: ["featured-sets"],
     queryFn: async () => {
-      const nums = [
-        "75192-1",
-        "10307-1",
-        "10294-1",
-        "10305-1",
-        "42158-1",
-        "21325-1",
-      ];
       const responses = await Promise.all(
-        nums.map((n) => api.get(`/sets/${n}`).then((r) => r.data)),
+        FEATURED_POOL.map((n) => api.get(`/sets/${n}`).then((r) => r.data)),
       );
       return responses;
     },
     staleTime: Infinity,
   });
+
+  const collectionNums = new Set(userSets?.map((us: any) => us.set_num) ?? []);
+  const displayedFeatured = featuredSets
+    ?.filter((set: any) => !collectionNums.has(set.set_num))
+    .slice(0, 6);
 
   const handleThemeSelect = (id: number | null, name: string) => {
     setActiveTheme(id);
@@ -745,23 +754,26 @@ function HomePage() {
         </div>
       )}
 
-      {showHome && featuredSets && (
-        <div className="mt-4">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">
-            Featured sets
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {featuredSets.map((set: any) => (
-              <SetCard
-                key={set.set_num}
-                set={set}
-                userSets={userSets}
-                onAdd={(setNum) => addToCollectionMutation.mutate(setNum)}
-              />
-            ))}
+      {showHome &&
+        featuredSets &&
+        displayedFeatured &&
+        displayedFeatured.length > 0 && (
+          <div className="mt-4">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">
+              Featured sets
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {displayedFeatured.map((set: any) => (
+                <SetCard
+                  key={set.set_num}
+                  set={set}
+                  userSets={userSets}
+                  onAdd={(setNum) => addToCollectionMutation.mutate(setNum)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }
